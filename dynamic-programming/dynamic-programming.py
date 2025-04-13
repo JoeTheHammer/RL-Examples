@@ -1,34 +1,16 @@
-from enum import Enum
-class Action(Enum):
-    NORTH = 0
-    SOUTH = 1
-    WEST = 2
-    EAST = 3
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+from environments.environments import GridworldAction, DynamicProgrammingGridworld
 
-action_symbols = {Action.NORTH: '↑', Action.SOUTH: '↓', Action.WEST: '←', Action.EAST: '→'}
-
-
-class GridWorldEnv:
-    def __init__(self):
-        # Grid holds the reward to move to this field
-        self.grid = [
-            [0, 10, 0, 5, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0]
-        ]
-        self.height = len(self.grid)
-        self.width = len(self.grid)
-        self.actions = list(Action)
-
+action_symbols = {GridworldAction.NORTH: '↑', GridworldAction.SOUTH: '↓', GridworldAction.WEST: '←', GridworldAction.EAST: '→'}
 
 class DynamicProgrammingAgent:
     def __init__(self, env, start_state):
         self.env = env
         self.position = start_state
-        self.actions = list(Action)
+        self.actions = list(GridworldAction)
         self.transition_probabilities = self.initialize_transitions()
         self.V = {state: 0.0 for state in self.transition_probabilities}
         self.policy = {}
@@ -65,13 +47,13 @@ class DynamicProgrammingAgent:
 
     def _move(self, state, action):
         x, y = state
-        if action == Action.NORTH:
+        if action == GridworldAction.NORTH:
             y = max(y - 1, 0)
-        elif action == Action.SOUTH:
+        elif action == GridworldAction.SOUTH:
             y = min(y + 1, self.env.height - 1)
-        elif action == Action.WEST:
+        elif action == GridworldAction.WEST:
             x = max(x - 1, 0)
-        elif action == Action.EAST:
+        elif action == GridworldAction.EAST:
             x = min(x + 1, self.env.width - 1)
         return x, y
 
@@ -103,7 +85,8 @@ class DynamicProgrammingAgent:
             if delta < phi:
                 break
 
-    #
+    # In DP, we need the model (there transition probabilities) to receive the policy.
+    # For example in monte carlo methods, we don't need this
     def extract_policy(self, gamma=0.9):
         for state in self.transition_probabilities:
             best_action = None
@@ -147,7 +130,7 @@ class DynamicProgrammingAgent:
         print()
 
     def solve_env(self):
-        # We don't get a reward from the env since in DP we already know the best
+        # We don't get a reward from the environments since in DP we already know the best
         # policy. Therefore, we don't update anything during the solving - we solved the
         # whole DP problem beforehand.
         self.render_position()
@@ -167,7 +150,7 @@ class DynamicProgrammingAgent:
 
 
 start_position = (2, 4)
-env = GridWorldEnv()
+env = DynamicProgrammingGridworld()
 agent = DynamicProgrammingAgent(env, start_position)
 print("Begin training")
 agent.train()
