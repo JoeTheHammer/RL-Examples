@@ -66,18 +66,72 @@ class GridworldWithObstacles:
             state(): Returns the current agent position.
             render(agent_pos=None): Prints a visual representation of the grid.
         """
-    def __init__(self, width=10, height=10):
-        self.width = width
-        self.height = height
-        self.start_pos = (0, 0)
-        self.goal_pos = (9, 9)
+    def __init__(self, hard=False):
 
-        # Define the obstacle positions (spanning multiple fields)
-        self.obstacles = {(1, 3), (2, 3), (3, 3), (4, 3), (6, 1), (6, 2), (6, 3), (6, 5), (6, 6),
-                          (6, 7), (6, 8), (4, 6), (5, 6), (6, 6), (8, 2), (9, 2)}
+        if hard:
+            self.width = 20
+            self.height = 20
+            self.start_pos = (0, 0)
+            self.goal_pos = (self.width - 1, self.height - 1)
 
-        # Current agent position
-        self.agent_pos = self.start_pos
+            obstacles = set()
+
+            # 1) Horizontal “shelves” every 3rd row (rows 2,5,8,11,14,17),
+            #    with gaps at columns divisible by 5 for connectivity.
+            for y in range(2, self.height, 3):
+                for x in range(self.width):
+                    if x % 5 != 0:
+                        obstacles.add((y, x))
+
+            # 2) Vertical “aisles” every 4th column (cols 3,7,11,15,19),
+            #    with gaps at rows divisible by 5 for connectivity.
+            for x in range(3, self.width, 4):
+                for y in range(self.height):
+                    if y % 5 != 0:
+                        obstacles.add((y, x))
+
+            # 3) A few deterministic “dead‐end” spurs off the main corridors:
+            spurs = [(1, 2), (1, 3), (4, 6), (5, 6), (6, 8), (7, 8), (9, 12), (10, 12), (12, 14),
+                     (13, 14), (15, 16), (16, 16), (17, 1), (18, 1)]
+            obstacles.update(spurs)
+
+            # 4) Ensure start & goal remain open
+            obstacles.discard(self.start_pos)
+            obstacles.discard(self.goal_pos)
+
+            obstacles.discard((19, 4))
+            obstacles.discard((2, 18))
+            obstacles.discard((2, 14))
+            obstacles.discard((2, 13))
+            obstacles.discard((5, 13))
+            obstacles.discard((5, 14))
+            obstacles.discard((6, 14))
+            obstacles.discard((17, 16))
+            obstacles.discard((18, 16))
+            obstacles.discard((8, 16))
+            obstacles.discard((5, 16))
+            obstacles.discard((11, 18))
+            obstacles.discard((14, 17))
+            obstacles.discard((17, 17))
+
+            obstacles.add((14, 0))
+
+            # 5) Finalize
+            self.obstacles = obstacles
+            self.agent_pos = self.start_pos
+
+        else:
+            self.width = 10
+            self.height = 10
+            self.start_pos = (0, 0)
+            self.goal_pos = (9, 9)
+
+            # Define the obstacle positions (spanning multiple fields)
+            self.obstacles = {(1, 3), (2, 3), (3, 3), (4, 3), (6, 1), (6, 2), (6, 3), (6, 5), (6, 6),
+                              (6, 7), (6, 8), (4, 6), (5, 6), (6, 6), (8, 2), (9, 2)}
+
+            # Current agent position
+            self.agent_pos = self.start_pos
 
     def reset(self):
         """Resets the environment to the starting state."""

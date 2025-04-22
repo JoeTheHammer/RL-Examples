@@ -135,6 +135,9 @@ class MonteCarloAgent:
 
 
 env = GridworldWithObstacles()
+
+env.render()
+
 agent = MonteCarloAgent(env, epsilon=0.2) # Relative high epsilon ensures enough exploration
 agent.train()
 
@@ -161,7 +164,7 @@ while not done:
 clear_console()
 env.render()
 print()
-print(f"The Monte Carlo agent solved the puzzle in {counter} steps. Theoretical best solution is 18.")
+print(f"The agent solved the puzzle in {counter} steps. Theoretical best solution is 18.")
 print()
 
 
