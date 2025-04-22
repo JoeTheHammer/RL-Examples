@@ -81,26 +81,62 @@ class GridworldWithObstacles:
 
     def reset(self):
         """Resets the environment to the starting state."""
-        pass
+        self.agent_pos = self.start_pos
+        return self.agent_pos
 
-    def step(self, action):
+    def step(self, action: GridworldAction):
         """
         Takes an action and returns (next_state, reward, done, info).
         Actions: 0=Up, 1=Right, 2=Down, 3=Left
         """
-        pass
+        y, x = self.agent_pos
+        next_pos = {
+            GridworldAction.NORTH: (y - 1, x),
+            GridworldAction.SOUTH: (y + 1, x),
+            GridworldAction.EAST: (y, x + 1), GridworldAction.WEST: (y, x - 1),
+        }.get(action, (y, x))
+
+        ny,  nx = next_pos
+
+        valid_move = False
+
+        # Check boundaries and obstacles
+        if 0 <= ny < self.height and 0 <= nx < self.width and (ny, nx) not in self.obstacles:
+            valid_move = True
+            self.agent_pos = (ny, nx)
+
+        done = self.is_terminal(self.agent_pos)
+        reward = 10 if done else -0.1
+        reward = reward - 2 if not valid_move else reward
+
+        # New state is the position of the agent.
+        # Reward: Only target field yields positive reward.
+        # Done: If we arrive in the terminal state.
+        # Information: Empty for now.
+        return self.agent_pos, reward, done, {}
 
     def get_valid_actions(self):
-        """Returns a list of valid actions for the current state."""
-        pass
+        """Returns a list of valid actions for the current state. Returns all actions that will
+        not result in a collision from the current position."""
+        valid_actions = []
+        y, x = self.agent_pos
+
+        for action in GridworldAction:
+            ny, nx = {GridworldAction.NORTH: (y - 1, x), GridworldAction.SOUTH: (y + 1, x),
+                GridworldAction.WEST: (y, x - 1), GridworldAction.EAST: (y, x + 1), }[action]
+
+            if 0 <= ny < self.height and 0 <= nx < self.width and (ny, nx) not in self.obstacles:
+                valid_actions.append(action)
+
+        return valid_actions
 
     def is_terminal(self, state):
         """Returns True if the given state is terminal."""
-        pass
+        return state == self.goal_pos
 
     def state(self):
         """Returns the current state (e.g., agent's position)."""
-        pass
+        return self.agent_pos
 
     def render(self, agent_pos=None):
         """Renders the gridworld with the agent and obstacles."""
