@@ -135,16 +135,18 @@ class MonteCarloAgent:
 
 
 env = GridworldWithObstacles()
-agent = MonteCarloAgent(env)
+agent = MonteCarloAgent(env, epsilon=0.2) # Relative high epsilon ensures enough exploration
 agent.train()
 
 print(agent.get_policy())
 print(agent.get_q_values())
 
-print("---- START THE GAME ----")
+clear_console()
 
+print("---- START THE GAME ----")
 done = False
 state = env.reset()
+counter = 0
 env.render()
 
 while not done:
@@ -153,8 +155,12 @@ while not done:
     time.sleep(0.5)              # Pause for animation effect
     action = agent.get_policy().get(state)
     next_state, reward, done, _ = env.step(action)
+    counter += 1
     state = next_state
 
+clear_console()
 env.render()
+print()
+print(f"The agent solved the puzzle in {counter} steps. Theoretical best solution is 18.")
 
 
